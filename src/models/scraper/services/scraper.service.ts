@@ -1,4 +1,7 @@
+import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { Queue } from 'bull'
 import { AxiosService } from 'src/models/axios/axios.service'
 import { PageService } from 'src/models/browser/page.service'
 import { BrowserService } from '../../browser/browser.service'
@@ -17,7 +20,9 @@ export class ScraperService {
     private readonly browserService: BrowserService,
     private readonly pageService: PageService,
     private readonly twitterTweetScraperService: TwitterTweetScraperService,
-    private readonly twitterProfileScraperService: TwitterProfileScraperService
+    private readonly twitterProfileScraperService: TwitterProfileScraperService,
+    private configService: ConfigService,
+    @InjectQueue('twitter-profile') private twitterProfile: Queue
   ) {}
 
   async tweetScrape(twitterScrapTweetDto: TwitterTargetDto) {
@@ -103,7 +108,7 @@ export class ScraperService {
       searchableTweets.map(({ tweet_url, username }) =>
         Promise.all([
           this._getTopComment(tweet_url),
-          this.twitterProfileScrape()
+          this.twitterProfileScrape(username)
         ])
       )
     )
@@ -131,8 +136,27 @@ export class ScraperService {
     }
   }
 
-  async twitterProfileScrape() {
-    const profileURL = 'https://twitter.com/' + 'dinhphamcanh400'
+  async listTwitterProfileScrape() {
+    try {
+      await this.twitterProfile.empty()
+      const res = await this.axiosService.axiosRef.get(
+        this.configService.get('DOMAIN_API') + '/profiles/list-username'
+      )
+
+      const listUsername = res.data?.map((e) => e.username)
+
+      for (const username of listUsername) {
+        const info = await this.twitterProfileScrape(username)
+        await this.twitterProfile.add({ info })
+      }
+      return 'crawl finnish'
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async twitterProfileScrape(username: string) {
+    const profileURL = 'https://twitter.com/' + username
     const [page] = await this.pageService.initBrowserPage(1)
     try {
       await page.goto(profileURL, { waitUntil: 'networkidle2', timeout: 0 })

@@ -52,7 +52,7 @@ export class TwitterProfileDto {
 
   @IsString()
   @Expose()
-  sns_username: string
+  username: string
 
   @IsDate()
   @Type(() => Date)

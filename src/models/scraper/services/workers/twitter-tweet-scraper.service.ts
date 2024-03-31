@@ -12,7 +12,6 @@ import {
   _serializeFollowNum
 } from 'src/common'
 import { ITweetBaseData } from '../../interfaces'
-import { FrontPageSchedulerService } from '../frontPageScheduler.service'
 
 // must be redefined utils because nestjs build: import cannot work with puppeteer
 const getFirstDigit = _getFirstDigit
@@ -40,7 +39,6 @@ export class TwitterTweetScraperService {
   }
 
   async scrapeTopComment(page: Page) {
-    await FrontPageSchedulerService.persistToFront(page)
     // define evaluateHandle util
     const eh = ehFactory(page)
     try {
@@ -51,8 +49,6 @@ export class TwitterTweetScraperService {
       await eh(this._scrollToEnoughTweets, 5)
     } catch (error) {
       throw error
-    } finally {
-      FrontPageSchedulerService.depersistToFront()
     }
 
     // crawl data
