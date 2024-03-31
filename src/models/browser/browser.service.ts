@@ -1,12 +1,16 @@
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import Redis from 'ioredis'
 import puppeteer, { Page } from 'puppeteer'
 import { BrowserList, InitBrowserOption } from './interface'
 
 @Injectable()
 export class BrowserService {
-  constructor(@InjectRedis() private readonly redis: Redis) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private readonly configService: ConfigService
+  ) {}
 
   static BROWSER_LIST: BrowserList = {} as BrowserList
 
@@ -54,14 +58,13 @@ export class BrowserService {
       ignoreHTTPSErrors: true,
       protocolTimeout: 30000,
       args: [
-        `--window-size=1920,${size === 'normal' ? 1080 : 2300}`
-        // '--disable-web-security',
-        // `--proxy-server=${proxyUrl}`,
-        // `--ignore-certificate-errors`,
-        // `--no-sandbox`,
-        // `--disable-setuid-sandbox`,
-        // '--disable-accelerated-2d-canvas',
-        // '--disable-gpu'
+        `--window-size=1920,${size === 'normal' ? 1080 : 2300}`,
+        '--disable-web-security',
+        `--ignore-certificate-errors`,
+        `--no-sandbox`,
+        `--disable-setuid-sandbox`,
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu'
       ]
     })
 
@@ -100,7 +103,7 @@ export class BrowserService {
     // fill username
     await page.type(
       'input[autocomplete="username"]',
-      'dinhphamcanh@gmail.com' || ''
+      this.configService.get('TWEET_USERNAME') || ''
     )
     await page.click('[role="button"]:not([data-testid])')
     await page.waitForSelector('input[autocomplete="current-password"]')
@@ -108,7 +111,7 @@ export class BrowserService {
     // fill password
     await page.type(
       'input[autocomplete="current-password"]',
-      'phamcanhdinh' || ''
+      this.configService.get('TWEET_PASSWORD') || ''
     )
     await page.waitForSelector(
       '[role="button"][data-testid="LoginForm_Login_Button"]'

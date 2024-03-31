@@ -1,6 +1,7 @@
 import { RedisModule } from '@nestjs-modules/ioredis'
+import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ScraperModule } from '../scraper/scraper.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
@@ -8,17 +9,31 @@ import { AppService } from './app.service'
 @Module({
   imports: [
     ScraperModule,
+
     RedisModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: () => ({
+      useFactory: async (configService: ConfigService) => ({
         config: {
-          host: 'redis-18799.c252.ap-southeast-1-1.ec2.cloud.redislabs.com',
-          port: 18799,
-          password: 'wsNQptisr0sorslPrwQiPcT940H0DPZV'
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+          password: configService.get('REDIS_PASSWORD')
         }
-      })
+      }),
+      inject: [ConfigService]
     }),
-    ConfigModule.forRoot({ envFilePath: '.env.headfull', isGlobal: true })
+
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+          password: configService.get('REDIS_PASSWORD')
+        }
+      }),
+      inject: [ConfigService]
+    }),
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true })
   ],
   controllers: [AppController],
   providers: [AppService]

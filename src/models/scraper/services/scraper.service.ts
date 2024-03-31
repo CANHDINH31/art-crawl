@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { AxiosService } from 'src/models/axios/axios.service'
 import { PageService } from 'src/models/browser/page.service'
 import { BrowserService } from '../../browser/browser.service'
-import { TwitterProfileDto, TwitterTargetDto, TwitterTargetType } from '../dto'
+import { TwitterTargetDto, TwitterTargetType } from '../dto'
 import { ITweetBaseData, ITweetData } from '../interfaces'
 import {
   TwitterProfileScraperService,
@@ -103,7 +103,7 @@ export class ScraperService {
       searchableTweets.map(({ tweet_url, username }) =>
         Promise.all([
           this._getTopComment(tweet_url),
-          this.twitterProfileScrape({ sns_username: username })
+          this.twitterProfileScrape()
         ])
       )
     )
@@ -131,7 +131,7 @@ export class ScraperService {
     }
   }
 
-  async twitterProfileScrape(profile: Pick<TwitterProfileDto, 'sns_username'>) {
+  async twitterProfileScrape() {
     const profileURL = 'https://twitter.com/' + 'dinhphamcanh400'
     const [page] = await this.pageService.initBrowserPage(1)
     try {

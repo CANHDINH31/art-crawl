@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common'
-import { TwitterProfileDto, TwitterTargetDto } from './dto'
+import { TwitterTargetDto } from './dto'
 import { ScraperService } from './services'
 
 @Controller('scraper')
@@ -12,7 +12,7 @@ export class ScraperController {
   }
 
   @Post('twitter-profile')
-  twitterProfileScrape(@Body() twitterProfileDto: TwitterProfileDto) {
-    return this.scraperService.twitterProfileScrape(twitterProfileDto)
+  twitterProfileScrape() {
+    return this.scraperService.twitterProfileScrape()
   }
 }

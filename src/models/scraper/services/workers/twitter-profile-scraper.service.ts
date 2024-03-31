@@ -24,7 +24,6 @@ export class TwitterProfileScraperService {
         this.getUserDescription,
         this.getUserLocation,
         this.getUserJoinedDate,
-        this.getUserExternalLink,
         this.getFollowNumber,
         this.getProfilePicture
       ].map((fn) => eh(pptrDefineFunction(fn)))
@@ -45,7 +44,7 @@ export class TwitterProfileScraperService {
       const innerHTML = el.innerHTML
       if (!innerHTML.startsWith('<') && innerHTML) names.push(el.innerHTML)
     })
-    return { name: names[0], username: names[1] }
+    return { name: names[0], username: names[1]?.replace('@', '') }
   }
 
   getProfilePicture(profile: Element) {
@@ -76,12 +75,7 @@ export class TwitterProfileScraperService {
     )?.textContent
     return joinedDate || ''
   }
-  getUserExternalLink(profile: Element) {
-    const externalLink = profile.querySelector(
-      '[data-testid=UserUrl]'
-    )?.textContent
-    return externalLink || ''
-  }
+
   getFollowNumber(profile: Element) {
     const followingEl = profile.querySelector(
       'a[href*="/following"]'
@@ -101,11 +95,10 @@ export class TwitterProfileScraperService {
 
     return {
       ...this.getProfileName(profileElement),
-      profilePicture: this.getProfilePicture(profileElement),
-      user_description: this.getUserDescription(profileElement),
-      user_location: this.getUserLocation(profileElement),
-      user_joined_date: this.getUserJoinedDate(profileElement),
-      user_external_link: this.getUserExternalLink(profileElement),
+      avatar: this.getProfilePicture(profileElement),
+      description: this.getUserDescription(profileElement),
+      location: this.getUserLocation(profileElement),
+      joinDate: this.getUserJoinedDate(profileElement),
       ...this.getFollowNumber(profileElement)
     }
   }
