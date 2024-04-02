@@ -69,10 +69,10 @@ export class ScraperService {
             if (detail.status === 'fulfilled') {
               acc.push({
                 ...searchableTweets.value[index],
-                top_comment: detail.value[0],
+                topComment: detail.value[0],
                 owner: {
-                  follower: detail.value[1]?.follower || 0,
-                  following: detail.value[1]?.following || 0
+                  follower: detail.value[1]?.follower as string,
+                  following: detail.value[1]?.following as string
                 }
               })
             }
@@ -105,9 +105,9 @@ export class ScraperService {
 
   private async _getDetailData(searchableTweets: ITweetBaseData[]) {
     return Promise.allSettled(
-      searchableTweets.map(({ tweet_url, username }) =>
+      searchableTweets.map(({ tweetUrl, username }) =>
         Promise.all([
-          this._getTopComment(tweet_url),
+          this._getTopComment(tweetUrl),
           this.twitterProfileScrape(username)
         ])
       )

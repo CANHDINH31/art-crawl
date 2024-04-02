@@ -1,30 +1,26 @@
 export interface ITweetBaseData {
-  tweet_url: string
-  tweet_id: string
+  tweetUrl: string
+  tweetId: string
   username: string
-  profile_img_url: string
+  avatar: string
   name: string
   replies: number
   retweets: number
   likes: number
   views: number
-  is_retweet: boolean
-  posted_time: string
+  postedTime: string
   content: string
   hashtags: string[]
-  mentions: string[]
   images: string[]
-  videos: string[]
-  external_links: string[]
 }
 
 export interface IOwnerData {
-  follower: number
-  following: number
+  follower: string
+  following: string
 }
 
 export type ITweetData = ITweetBaseData & {
-  top_comment: ITweetBaseData
+  topComment: ITweetBaseData
   owner: IOwnerData
 }
 

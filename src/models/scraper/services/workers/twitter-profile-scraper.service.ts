@@ -84,8 +84,8 @@ export class TwitterProfileScraperService {
       'a[href*="/verified_followers"]'
     )?.textContent
     return {
-      follower: serializeFollowNum(followerEl),
-      following: serializeFollowNum(followingEl)
+      follower: followerEl,
+      following: followingEl
     }
   }
 

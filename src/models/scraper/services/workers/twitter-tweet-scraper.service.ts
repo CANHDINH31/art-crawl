@@ -35,7 +35,7 @@ export class TwitterTweetScraperService {
     // crawl data
     const data = await eh(this._scrapeListTweet)
     const tweets = await data.jsonValue()
-    return tweets.filter((tweet) => tweet.tweet_url)
+    return tweets.filter((tweet) => tweet.tweetUrl)
   }
 
   async scrapeTopComment(page: Page) {
@@ -70,23 +70,19 @@ export class TwitterTweetScraperService {
       const tweet_url = this._getTweetUrl(tweet)
       const content = this._getContent(tweet)
       return {
-        tweet_url,
-        tweet_id: tweet_url.split('/').pop() || '',
+        tweetUrl: tweet_url,
+        tweetId: tweet_url.split('/').pop() || '',
         username: tweet_url.split('/')[3] || '',
         name: this._getName(tweet),
-        profile_img_url: this._getProfilePicture(tweet),
+        avatar: this._getProfilePicture(tweet),
         replies: this._getReplyNumber(tweet),
         retweets: this._getRetweetNumber(tweet),
         likes: this._getLikeNumber(tweet),
         views: this._getViewNumber(tweet),
-        is_retweet: this._getIsRetweet(tweet),
-        posted_time: this._getPostedTime(tweet),
+        postedTime: this._getPostedTime(tweet),
         content,
         hashtags: content.match(/#\w+/g) || [],
-        mentions: content.match(/@\w+/g) || [],
-        images: this._getImages(tweet),
-        videos: this._getVideos(tweet),
-        external_links: this._getExternalLinks(tweet)
+        images: this._getImages(tweet)
       }
     })
     return data
@@ -128,19 +124,15 @@ export class TwitterTweetScraperService {
         this._findAllPresentTweets,
         this._getAllPresentTweetsLength,
         this._getTweetUrl,
-        this._getIsRetweet,
         this._getName,
         this._getProfilePicture,
         this._getReplyNumber,
         this._getRetweetNumber,
         this._getLikeNumber,
         this._getViewNumber,
-        this._getIsRetweet,
         this._getPostedTime,
         this._getContent,
         this._getImages,
-        this._getVideos,
-        this._getExternalLinks,
         this._scrapeDiscoverMoreElPosition,
         this._scrapeListTweet,
         this._scrapeListComment
@@ -172,9 +164,7 @@ export class TwitterTweetScraperService {
       ''
     )
   }
-  private _getIsRetweet(tweet: Element) {
-    return !!tweet.querySelector('[data-testid="unretweet"]')
-  }
+
   private _getName(tweet: Element) {
     return (
       tweet.querySelector('[data-testid="User-Name"] > div span > span')
@@ -203,8 +193,8 @@ export class TwitterTweetScraperService {
   }
   private _getViewNumber(tweet: Element) {
     const ariaLabelString =
-      tweet.querySelector('[aria-label*="View"]')?.getAttribute('aria-label') ||
-      ''
+      tweet.querySelector('[data-testid="app-text-transition-container"]')
+        ?.textContent || ''
     return getFirstDigit(ariaLabelString)
   }
   private _getPostedTime(tweet: Element) {
@@ -229,29 +219,5 @@ export class TwitterTweetScraperService {
       allTweetImageEls,
       (imgEl) => imgEl.querySelector('img')?.getAttribute('src') || ''
     )
-  }
-  private _getVideos(tweet: Element) {
-    const allTweetVideoEls = tweet.querySelectorAll(
-      '[data-testid="videoPlayer"]'
-    )
-    return mapElementFn.call<
-      NodeListOf<Element>,
-      [(element: Element) => string],
-      string[]
-    >(
-      allTweetVideoEls,
-      (videoEl) => videoEl.querySelector('video')?.getAttribute('src') || ''
-    )
-  }
-  private _getExternalLinks(tweet: Element) {
-    const allTweetExternalLinkEls = tweet
-      .querySelector('[data-testid="tweetText"]')
-      ?.querySelectorAll('a[href*=http]')
-    if (!allTweetExternalLinkEls) return []
-    return mapElementFn.call<
-      NodeListOf<Element>,
-      [(element: Element) => string],
-      string[]
-    >(allTweetExternalLinkEls, (linkEl) => linkEl.getAttribute('href') || '')
   }
 }

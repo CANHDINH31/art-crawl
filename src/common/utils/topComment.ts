@@ -1,7 +1,7 @@
 import { ITweetBaseData } from 'src/models/scraper/interfaces'
 
 export const getTopComment = (commentData: ITweetBaseData[]) => {
-  if (!commentData[0]?.tweet_url) commentData.shift()
+  if (!commentData[0]?.tweetUrl) commentData.shift()
   if (commentData.length === 0) return null
   let topCommentIndex = 0
   let topCommentValue =
