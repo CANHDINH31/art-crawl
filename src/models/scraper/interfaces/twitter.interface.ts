@@ -21,7 +21,8 @@ export interface IOwnerData {
 
 export type ITweetData = ITweetBaseData & {
   topComment: ITweetBaseData
-  owner: IOwnerData
+  follower: string
+  following: string
 }
 
 export interface ICreateTweetsData {

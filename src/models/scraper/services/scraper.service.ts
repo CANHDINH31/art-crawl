@@ -70,10 +70,8 @@ export class ScraperService {
               acc.push({
                 ...searchableTweets.value[index],
                 topComment: detail.value[0],
-                owner: {
-                  follower: detail.value[1]?.follower as string,
-                  following: detail.value[1]?.following as string
-                }
+                follower: detail.value[1]?.follower as string,
+                following: detail.value[1]?.following as string
               })
             }
             return acc
