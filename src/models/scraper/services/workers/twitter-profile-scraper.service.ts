@@ -50,10 +50,10 @@ export class TwitterProfileScraperService {
   getProfilePicture(profile: Element) {
     const profilePictureURL = profile
       .querySelector('[data-testid*=UserAvatar-Container]')
-      ?.querySelector('a')
-      ?.getAttribute('href')
+      ?.querySelector('img')
+      ?.getAttribute('src')
     if (!profilePictureURL) return ''
-    return 'https://twitter.com' + profilePictureURL
+    return profilePictureURL
   }
 
   getUserDescription(profile: Element) {

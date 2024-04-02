@@ -160,7 +160,6 @@ export class ScraperService {
     const [page] = await this.pageService.initBrowserPage(1)
     try {
       await page.goto(profileURL, { waitUntil: 'networkidle2', timeout: 0 })
-
       const data = await this.twitterProfileScraperService.scrape(page)
       return data
     } catch (error) {

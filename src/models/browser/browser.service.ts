@@ -53,7 +53,7 @@ export class BrowserService {
 
     // Launch the browser
     const browser = await puppeteer.launch({
-      headless: 'new',
+      headless: false,
       defaultViewport: null,
       ignoreHTTPSErrors: true,
       protocolTimeout: 30000,
@@ -61,6 +61,7 @@ export class BrowserService {
         `--window-size=1920,${size === 'normal' ? 1080 : 2300}`,
         '--disable-web-security',
         `--ignore-certificate-errors`,
+        `--disable-notifications`,
         `--no-sandbox`,
         `--disable-setuid-sandbox`,
         '--disable-accelerated-2d-canvas',

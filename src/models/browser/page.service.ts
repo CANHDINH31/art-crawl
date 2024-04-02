@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Browser, Page } from 'puppeteer'
-import { RESOURCE_TYPE_IGNORE } from 'src/common/constant/resourceTypeIgnore'
+import { RESOURCE_TYPE_IGNORE } from 'src/common'
 import { BrowserService } from './browser.service'
 
 @Injectable()
