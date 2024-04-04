@@ -78,7 +78,6 @@ export class ScraperService {
 
       for (const searchableTweets of listSearchableTweets) {
         if (searchableTweets.status === 'rejected') continue
-        console.log('searchableTweets: 💨💨', searchableTweets.value.length)
 
         const detailData = await this._getDetailData(searchableTweets.value)
 
