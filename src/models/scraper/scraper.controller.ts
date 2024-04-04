@@ -16,6 +16,11 @@ export class ScraperController {
     return this.scraperService.listTwitterProfileScrape()
   }
 
+  @Get('list-tweet')
+  listTweet() {
+    return this.scraperService.listTweet()
+  }
+
   @Post('twitter-profile')
   twitterProfileScrape(@Body() twitterProfileDto: TwitterProfileDto) {
     return this.scraperService.twitterProfileScrape(twitterProfileDto.username)

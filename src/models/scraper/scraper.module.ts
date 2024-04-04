@@ -2,7 +2,10 @@ import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
 import { AxiosModule } from '../axios/axios.module'
 import { BrowserModule } from '../browser/browser.module'
-import { ScraperConsumer } from './scraper.consumer'
+import {
+  ScraperProfileConsumer,
+  ScraperTweetConsumer
+} from './scraper.consumer'
 import { ScraperController } from './scraper.controller'
 import {
   ScraperService,
@@ -16,6 +19,9 @@ import {
     BrowserModule,
     BullModule.registerQueue({
       name: 'twitter-profile'
+    }),
+    BullModule.registerQueue({
+      name: 'tweet'
     })
   ],
   controllers: [ScraperController],
@@ -23,7 +29,8 @@ import {
     ScraperService,
     TwitterTweetScraperService,
     TwitterProfileScraperService,
-    ScraperConsumer
+    ScraperProfileConsumer,
+    ScraperTweetConsumer
   ],
   exports: [
     ScraperService,

@@ -22,7 +22,8 @@ export class ScraperService {
     private readonly twitterTweetScraperService: TwitterTweetScraperService,
     private readonly twitterProfileScraperService: TwitterProfileScraperService,
     private configService: ConfigService,
-    @InjectQueue('twitter-profile') private twitterProfile: Queue
+    @InjectQueue('twitter-profile') private twitterProfileQueue: Queue,
+    @InjectQueue('tweet') private tweetQueue: Queue
   ) {}
 
   async tweetScrape(twitterScrapTweetDto: TwitterTargetDto) {
@@ -136,7 +137,7 @@ export class ScraperService {
 
   async listTwitterProfileScrape() {
     try {
-      await this.twitterProfile.empty()
+      await this.twitterProfileQueue.empty()
       const res = await this.axiosService.axiosRef.get(
         this.configService.get('DOMAIN_API') + '/profiles/list-username'
       )
@@ -145,9 +146,22 @@ export class ScraperService {
 
       for (const username of listUsername) {
         const info = await this.twitterProfileScrape(username)
-        await this.twitterProfile.add({ info })
+        await this.twitterProfileQueue.add({ info })
       }
-      return 'crawl finnish'
+      return 'crawl twiiter profile finnish'
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async listTweet() {
+    try {
+      await this.tweetQueue.empty()
+
+      for (let i = 1; i <= 10; i++) {
+        await this.tweetQueue.add({ i })
+      }
+      return 'crawl tweet finnish'
     } catch (error) {
       throw error
     }
