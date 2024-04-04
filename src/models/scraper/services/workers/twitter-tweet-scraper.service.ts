@@ -195,7 +195,7 @@ export class TwitterTweetScraperService {
     const ariaLabelString =
       tweet.querySelector('[data-testid="app-text-transition-container"]')
         ?.textContent || ''
-    return getFirstDigit(ariaLabelString)
+    return ariaLabelString
   }
   private _getPostedTime(tweet: Element) {
     return (

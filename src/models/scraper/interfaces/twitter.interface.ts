@@ -7,7 +7,7 @@ export interface ITweetBaseData {
   replies: number
   retweets: number
   likes: number
-  views: number
+  views: string
   postedTime: string
   content: string
   hashtags: string[]
