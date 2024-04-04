@@ -11,7 +11,7 @@ import {
 
 export enum TwitterTargetType {
   URL = 'URL',
-  TOPICS = 'TOPICS',
+  KEYWORDS = 'KEYWORDS',
   HASHTAGS = 'HASHTAGS'
 }
 
@@ -19,7 +19,7 @@ export class TwitterTargetDto {
   @IsNumber()
   @IsNotEmpty()
   @Expose()
-  id: number
+  id: string
 
   @IsEnum(TwitterTargetType)
   @Expose()
@@ -34,9 +34,9 @@ export class TwitterTargetDto {
 
   @IsArray()
   @IsString({ each: true })
-  @ValidateIf((o) => o.type === TwitterTargetType.TOPICS)
+  @ValidateIf((o) => o.type === TwitterTargetType.KEYWORDS)
   @Expose()
-  topics: string[]
+  keywords: string[]
 
   @IsArray()
   @IsString({ each: true })

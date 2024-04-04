@@ -6,6 +6,11 @@ import { ScraperService } from './services'
 export class ScraperController {
   constructor(private readonly scraperService: ScraperService) {}
 
+  @Get('list-tweet')
+  listTweet() {
+    return this.scraperService.listTweet()
+  }
+
   @Post('twitter')
   twitterScrap(@Body() twitterScrapDto: TwitterTargetDto) {
     return this.scraperService.tweetScrape(twitterScrapDto)
@@ -14,11 +19,6 @@ export class ScraperController {
   @Get('list-twitter-profile')
   listTwitterProfileScrape() {
     return this.scraperService.listTwitterProfileScrape()
-  }
-
-  @Get('list-tweet')
-  listTweet() {
-    return this.scraperService.listTweet()
   }
 
   @Post('twitter-profile')

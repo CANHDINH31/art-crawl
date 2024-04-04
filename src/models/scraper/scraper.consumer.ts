@@ -16,7 +16,7 @@ export class ScraperProfileConsumer {
         this.configService.get('DOMAIN_API') + '/profiles/update-by-username',
         job.data.info
       )
-      console.log('save info profile success')
+      console.log('call api save info profile success')
     } catch (error) {
       throw error
     }
@@ -32,7 +32,11 @@ export class ScraperTweetConsumer {
   @Process()
   async twitterProfile(job: Job) {
     try {
-      console.log(job.data)
+      await this.axiosService.axiosRef.post(
+        this.configService.get('DOMAIN_API') + '/tweets/save',
+        job.data
+      )
+      console.log('call api save tweet success')
     } catch (error) {
       throw error
     }

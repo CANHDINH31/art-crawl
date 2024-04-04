@@ -26,28 +26,45 @@ export class ScraperService {
     @InjectQueue('tweet') private tweetQueue: Queue
   ) {}
 
+  async listTweet() {
+    try {
+      await this.tweetQueue.empty()
+
+      const res = await this.axiosService.axiosRef.get(
+        this.configService.get('DOMAIN_API') + '/targets?status=1'
+      )
+
+      const resultTaget = res.data?.map((e) => ({
+        id: e._id,
+        keywords: e?.keywords,
+        hashtags: e?.hashtags,
+        urls: e?.urls
+      }))
+
+      const listTarget = this._gennerateTarget(resultTaget)
+
+      for (const target of listTarget) {
+        const data = await this.tweetScrape(target as TwitterTargetDto)
+        data?.length > 0 &&
+          this.tweetQueue.add({
+            target: target.id,
+            lastCrawl: new Date(),
+            data
+          })
+      }
+
+      return 'crawl tweet finnish'
+    } catch (error) {
+      throw error
+    }
+  }
+
   async tweetScrape(twitterScrapTweetDto: TwitterTargetDto) {
     console.time('start crawl 👨‍🚒👨‍🚒👨‍🚒')
     const profile = await this._tweetScrape(twitterScrapTweetDto)
     console.timeEnd('start crawl 👨‍🚒👨‍🚒👨‍🚒')
 
     return profile
-
-    // if (listPosts) {
-    //   // call api to save data
-    //   const data: ICreateTweetsData = {
-    //     target_id: twitterScrapTweetDto.id,
-    //     last_crawl_at: new Date(),
-    //     list_posts: listPosts
-    //   }
-    //   console.log('length: ❎', listPosts.length)
-
-    //   const res = await this.axiosService.axiosRef.post(
-    //     process.env.SOCIAL_API_CREATE_TWEETS_URL || '',
-    //     data
-    //   )
-    //   console.log('🤢🤢', res.data)
-    // }
   }
 
   private async _tweetScrape(twitterScrapTweetDto: TwitterTargetDto) {
@@ -154,19 +171,6 @@ export class ScraperService {
     }
   }
 
-  async listTweet() {
-    try {
-      await this.tweetQueue.empty()
-
-      for (let i = 1; i <= 10; i++) {
-        await this.tweetQueue.add({ i })
-      }
-      return 'crawl tweet finnish'
-    } catch (error) {
-      throw error
-    }
-  }
-
   async twitterProfileScrape(username: string) {
     const profileURL = 'https://twitter.com/' + username
     const [page] = await this.pageService.initBrowserPage(1)
@@ -181,12 +185,12 @@ export class ScraperService {
     }
   }
 
-  private _generateURLS({ hashtags, topics, url, type }: TwitterTargetDto) {
+  private _generateURLS({ hashtags, keywords, url, type }: TwitterTargetDto) {
     switch (type) {
       case TwitterTargetType.URL:
         return url
-      case TwitterTargetType.TOPICS:
-        return topics.map((topic) => this._getSearchUrl(topic))
+      case TwitterTargetType.KEYWORDS:
+        return keywords.map((keyword) => this._getSearchUrl(keyword))
       case TwitterTargetType.HASHTAGS:
         return hashtags.map((hashtag) =>
           this._getSearchUrl(`(%23${hashtag.slice(1)})`)
@@ -198,4 +202,37 @@ export class ScraperService {
 
   private _getSearchUrl = (query: string) =>
     `https://twitter.com/search?q=${query}%20min_replies%3A10&src=typed_query`
+
+  private _gennerateTarget(
+    listTarget: {
+      id: string
+      urls?: string[]
+      keywords?: string[]
+      hashtags?: string[]
+    }[]
+  ) {
+    const newList = listTarget.flatMap((target) => {
+      const urlItem = {
+        id: target.id,
+        type: TwitterTargetType.URL,
+        url: target?.urls
+      }
+
+      const keywordItem = {
+        id: target.id,
+        type: TwitterTargetType.KEYWORDS,
+        keywords: target?.keywords
+      }
+
+      const hashtagItem = {
+        id: target.id,
+        type: TwitterTargetType.HASHTAGS,
+        hashtags: target?.hashtags
+      }
+
+      return [urlItem, keywordItem, hashtagItem]
+    })
+
+    return newList
+  }
 }
