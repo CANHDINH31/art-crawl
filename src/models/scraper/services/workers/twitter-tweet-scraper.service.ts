@@ -193,9 +193,10 @@ export class TwitterTweetScraperService {
   }
   private _getViewNumber(tweet: Element) {
     const ariaLabelString =
-      tweet.querySelector('[data-testid="app-text-transition-container"]')
-        ?.textContent || ''
-    return ariaLabelString
+      tweet.querySelector('div[role="group"]')?.getAttribute('aria-label') || ''
+    const splitArray = ariaLabelString?.split(',')
+    const view = splitArray?.[splitArray.length - 1]
+    return getFirstDigit(view)
   }
   private _getPostedTime(tweet: Element) {
     return (

@@ -60,10 +60,7 @@ export class ScraperService {
   }
 
   async tweetScrape(twitterScrapTweetDto: TwitterTargetDto) {
-    console.time('start crawl 👨‍🚒👨‍🚒👨‍🚒')
     const profile = await this._tweetScrape(twitterScrapTweetDto)
-    console.timeEnd('start crawl 👨‍🚒👨‍🚒👨‍🚒')
-
     return profile
   }
 
@@ -75,7 +72,6 @@ export class ScraperService {
 
     try {
       const listSearchableTweets = await this._getSearchableTweets(urls)
-
       for (const searchableTweets of listSearchableTweets) {
         if (searchableTweets.status === 'rejected') continue
 
@@ -95,7 +91,8 @@ export class ScraperService {
           },
           []
         )
-        console.log('listTweet:💨💨', listTweet.length)
+        console.log('listTweet:', listTweet.length)
+        if (listTweet.length == 0) break
         tweetData.push(...listTweet)
       }
     } catch (error) {
@@ -143,7 +140,7 @@ export class ScraperService {
       })
       return await this.twitterTweetScraperService.scrapeTopComment(tweetPage)
     } catch (error: any) {
-      console.log('👺👺👺 topCommentHandle ~ error:', error.message, retryCount)
+      console.log('topCommentHandle ~ error:', error.message, retryCount)
       if (retryCount <= 0) throw error
       return this._getTopCommentHandle(tweetUrl, retryCount - 1)
     } finally {
