@@ -11,6 +11,11 @@ export class ScraperController {
     return this.scraperService.listTweet()
   }
 
+  @Get('list-reply')
+  listReply() {
+    return this.scraperService.listReply()
+  }
+
   @Post('twitter')
   twitterScrap(@Body() twitterScrapDto: TwitterTargetDto) {
     return this.scraperService.tweetScrape(twitterScrapDto)

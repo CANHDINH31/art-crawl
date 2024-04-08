@@ -4,6 +4,7 @@ import { AxiosModule } from '../axios/axios.module'
 import { BrowserModule } from '../browser/browser.module'
 import {
   ScraperProfileConsumer,
+  ScraperReplyConsumer,
   ScraperTweetConsumer
 } from './scraper.consumer'
 import { ScraperController } from './scraper.controller'
@@ -12,6 +13,7 @@ import {
   TwitterProfileScraperService,
   TwitterTweetScraperService
 } from './services'
+import { TwitterRecrawlTweetScraperService } from './services/workers/twitter-recrawl-tweet-scraper.service'
 
 @Module({
   imports: [
@@ -22,6 +24,9 @@ import {
     }),
     BullModule.registerQueue({
       name: 'tweet'
+    }),
+    BullModule.registerQueue({
+      name: 'reply'
     })
   ],
   controllers: [ScraperController],
@@ -29,13 +34,16 @@ import {
     ScraperService,
     TwitterTweetScraperService,
     TwitterProfileScraperService,
+    TwitterRecrawlTweetScraperService,
     ScraperProfileConsumer,
-    ScraperTweetConsumer
+    ScraperTweetConsumer,
+    ScraperReplyConsumer
   ],
   exports: [
     ScraperService,
     TwitterTweetScraperService,
-    TwitterProfileScraperService
+    TwitterProfileScraperService,
+    TwitterRecrawlTweetScraperService
   ]
 })
 export class ScraperModule {}

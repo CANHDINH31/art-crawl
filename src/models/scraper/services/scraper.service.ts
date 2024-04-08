@@ -11,6 +11,7 @@ import {
   TwitterProfileScraperService,
   TwitterTweetScraperService
 } from './workers'
+import { TwitterRecrawlTweetScraperService } from './workers/twitter-recrawl-tweet-scraper.service'
 
 @Injectable()
 export class ScraperService {
@@ -20,10 +21,12 @@ export class ScraperService {
     private readonly browserService: BrowserService,
     private readonly pageService: PageService,
     private readonly twitterTweetScraperService: TwitterTweetScraperService,
+    private readonly twitterRecrawlTweetScraperService: TwitterRecrawlTweetScraperService,
     private readonly twitterProfileScraperService: TwitterProfileScraperService,
     private configService: ConfigService,
     @InjectQueue('twitter-profile') private twitterProfileQueue: Queue,
-    @InjectQueue('tweet') private tweetQueue: Queue
+    @InjectQueue('tweet') private tweetQueue: Queue,
+    @InjectQueue('reply') private replyQueue: Queue
   ) {}
 
   async listTweet() {
@@ -56,6 +59,65 @@ export class ScraperService {
       return 'crawl tweet finnish'
     } catch (error) {
       throw error
+    }
+  }
+
+  async listReply() {
+    try {
+      // await this.replyQueue.empty()
+      // let i = 1
+
+      // while (true) {
+      //   const res = await this.axiosService.axiosRef.get(
+      //     this.configService.get('DOMAIN_API') + `/replies?page=${i}`
+      //   )
+
+      //   if (res?.data?.data?.length === 0) {
+      //     break
+      //   }
+      //   const listReplies = res?.data?.data
+      //   const listResult: any = []
+      //   for (const reply of listReplies) {
+      //     const url = `https://twitter.com/${reply?.tweet?.target?.profile?.username}/status/${reply.tweetId}`
+      //     const data = await this._getTopComment(url)
+      //     listResult.push(data)
+      //   }
+
+      //   i++
+      //   return listResult
+      // }
+      // return 'crawl reply finnish'
+
+      // this.replyQueue.add({ data: i })
+
+      const url = 'https://twitter.com/dinhphamcanh/status/1777256273085685771'
+      const data = await this._getRecrawlTopCommentHandle(url, this.RETRY_TIMES)
+      return data
+    } catch (error) {
+      throw error
+    }
+  }
+
+  private async _getRecrawlTopCommentHandle(
+    tweetUrl: string,
+    retryCount: number
+  ) {
+    const [tweetPage] = await this.pageService.initBrowserSmallPage(1)
+
+    try {
+      await tweetPage.goto(tweetUrl, {
+        waitUntil: 'networkidle2',
+        timeout: 0
+      })
+      return await this.twitterRecrawlTweetScraperService.scrapeRecrawlTopComment(
+        tweetPage
+      )
+    } catch (error: any) {
+      console.log('topCommentHandle ~ error:', error.message, retryCount)
+      if (retryCount <= 0) throw error
+      return this._getTopCommentHandle(tweetUrl, retryCount - 1)
+    } finally {
+      this.pageService.closePages(tweetPage)
     }
   }
 

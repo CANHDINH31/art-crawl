@@ -30,13 +30,30 @@ export class ScraperTweetConsumer {
     private readonly axiosService: AxiosService
   ) {}
   @Process()
-  async twitterProfile(job: Job) {
+  async tweet(job: Job) {
     try {
       await this.axiosService.axiosRef.post(
         this.configService.get('DOMAIN_API') + '/tweets/save',
         job.data
       )
       console.log('call api save tweet success')
+    } catch (error) {
+      throw error
+    }
+  }
+}
+
+@Processor('reply')
+export class ScraperReplyConsumer {
+  constructor(
+    private configService: ConfigService,
+    private readonly axiosService: AxiosService
+  ) {}
+  @Process()
+  async reply(job: Job) {
+    try {
+      console.log(job.data)
+      console.log('call api reply tweet success')
     } catch (error) {
       throw error
     }
