@@ -64,12 +64,11 @@ export class ScraperService {
 
   async listReply() {
     try {
-      await this.replyQueue.empty()
       let i = 1
 
       while (true) {
         const res = await this.axiosService.axiosRef.get(
-          this.configService.get('DOMAIN_API') + `/replies?page=${i}`
+          this.configService.get('DOMAIN_API') + `/replies?page=${i}&status=0`
         )
 
         if (res?.data?.data?.length === 0) {
