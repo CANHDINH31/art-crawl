@@ -64,35 +64,29 @@ export class ScraperService {
 
   async listReply() {
     try {
-      // await this.replyQueue.empty()
-      // let i = 1
+      await this.replyQueue.empty()
+      let i = 1
 
-      // while (true) {
-      //   const res = await this.axiosService.axiosRef.get(
-      //     this.configService.get('DOMAIN_API') + `/replies?page=${i}`
-      //   )
+      while (true) {
+        const res = await this.axiosService.axiosRef.get(
+          this.configService.get('DOMAIN_API') + `/replies?page=${i}`
+        )
 
-      //   if (res?.data?.data?.length === 0) {
-      //     break
-      //   }
-      //   const listReplies = res?.data?.data
-      //   const listResult: any = []
-      //   for (const reply of listReplies) {
-      //     const url = `https://twitter.com/${reply?.tweet?.target?.profile?.username}/status/${reply.tweetId}`
-      //     const data = await this._getTopComment(url)
-      //     listResult.push(data)
-      //   }
+        if (res?.data?.data?.length === 0) {
+          break
+        }
+        const listReplies = res?.data?.data
+        const listResult: any = []
+        for (const reply of listReplies) {
+          const url = `https://twitter.com/${reply?.tweet?.target?.profile?.username}/status/${reply.tweetId}`
+          const data = await this._getRecrawlTopCommentHandle(url, 3)
+          listResult.push({ tweetId: reply.tweetId, ...data[0] })
+        }
 
-      //   i++
-      //   return listResult
-      // }
-      // return 'crawl reply finnish'
-
-      // this.replyQueue.add({ data: i })
-
-      const url = 'https://twitter.com/dinhphamcanh/status/1777256273085685771'
-      const data = await this._getRecrawlTopCommentHandle(url, this.RETRY_TIMES)
-      return data
+        i++
+        this.replyQueue.add({ data: listResult })
+      }
+      return 'crawl reply finnish'
     } catch (error) {
       throw error
     }

@@ -52,7 +52,10 @@ export class ScraperReplyConsumer {
   @Process()
   async reply(job: Job) {
     try {
-      console.log(job.data)
+      await this.axiosService.axiosRef.post(
+        this.configService.get('DOMAIN_API') + '/replies/save',
+        job.data
+      )
       console.log('call api reply tweet success')
     } catch (error) {
       throw error

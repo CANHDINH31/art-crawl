@@ -4,7 +4,6 @@ import {
   ehFactory,
   pptrDefineFunction,
   _findElementFn,
-  _findIndexElementFn,
   _getFirstDigit,
   _mapElementFn,
   _scrollToEnoughPost,
@@ -17,7 +16,6 @@ const getFirstDigit = _getFirstDigit
 const scrollToEnoughPost = _scrollToEnoughPost
 const mapElementFn = _mapElementFn
 const findElementFn = _findElementFn
-const findIndexElementFn = _findIndexElementFn
 const serializeFollowNum = _serializeFollowNum
 
 @Injectable()
@@ -43,9 +41,6 @@ export class TwitterRecrawlTweetScraperService {
     try {
       // define required functions
       await this._defineFunction(eh)
-
-      // scroll for enough comment (5 comments)
-      await eh(this._scrollToEnoughTweets, 5)
     } catch (error) {
       throw error
     }
@@ -61,38 +56,21 @@ export class TwitterRecrawlTweetScraperService {
     const allPresentTweets = this._findAllPresentTweets()
     const data = mapElementFn.call<
       NodeListOf<Element>,
-      [(tweet: Element) => ITweetBaseData],
+      [(tweet: Element) => any],
       ITweetBaseData[]
     >(allPresentTweets, (tweet) => {
-      const tweet_url = this._getTweetUrl(tweet)
-      const content = this._getContent(tweet)
       return {
-        tweetUrl: tweet_url,
-        tweetId: tweet_url.split('/').pop() || '',
-        username: tweet_url.split('/')[3] || '',
-        name: this._getName(tweet),
-        avatar: this._getProfilePicture(tweet),
         replies: this._getReplyNumber(tweet),
         retweets: this._getRetweetNumber(tweet),
         likes: this._getLikeNumber(tweet),
-        views: this._getViewNumber(tweet),
-        postedTime: this._getPostedTime(tweet),
-        content,
-        hashtags: content.match(/#\w+/g) || [],
-        images: this._getImages(tweet)
+        views: this._getViewNumber(tweet)
       }
     })
     return data
   }
 
   private _scrapeListComment() {
-    const discoverMoreElPosition = this._scrapeDiscoverMoreElPosition()
-    const allPresentTweets = this._findAllPresentTweets()
-    const satisfiedIndex = findIndexElementFn.call(
-      allPresentTweets,
-      (tweet) => tweet.getBoundingClientRect().y > discoverMoreElPosition
-    )
-    return this._scrapeListTweet().slice(0, satisfiedIndex)
+    return this._scrapeListTweet().slice(1, 2)
   }
 
   private _scrapeDiscoverMoreElPosition() {
@@ -120,16 +98,10 @@ export class TwitterRecrawlTweetScraperService {
         'const findIndexElementFn = Array.prototype.findIndex',
         this._findAllPresentTweets,
         this._getAllPresentTweetsLength,
-        this._getTweetUrl,
-        this._getName,
-        this._getProfilePicture,
         this._getReplyNumber,
         this._getRetweetNumber,
         this._getLikeNumber,
         this._getViewNumber,
-        this._getPostedTime,
-        this._getContent,
-        this._getImages,
         this._scrapeDiscoverMoreElPosition,
         this._scrapeListTweet,
         this._scrapeListComment
@@ -147,27 +119,7 @@ export class TwitterRecrawlTweetScraperService {
   private _getAllPresentTweetsLength() {
     return this._findAllPresentTweets().length
   }
-  private _getTweetUrl(tweet: Element) {
-    const _url =
-      tweet
-        .querySelector('[data-testid="User-Name"] a[aria-label][dir]')
-        ?.getAttribute('href') || ''
-    if (_url) return `https://twitter.com${_url}`
-    else return ''
-  }
-  private _getProfilePicture(tweet: Element) {
-    return (
-      tweet.querySelector('img[alt][draggable="true"]')?.getAttribute('src') ||
-      ''
-    )
-  }
 
-  private _getName(tweet: Element) {
-    return (
-      tweet.querySelector('[data-testid="User-Name"] > div span > span')
-        ?.textContent || ''
-    )
-  }
   private _getReplyNumber(tweet: Element) {
     const ariaLabelString =
       tweet
@@ -194,28 +146,5 @@ export class TwitterRecrawlTweetScraperService {
     const splitArray = ariaLabelString?.split(',')
     const view = splitArray?.[splitArray.length - 1]
     return getFirstDigit(view)
-  }
-  private _getPostedTime(tweet: Element) {
-    return (
-      tweet
-        .querySelector('a[aria-label][dir] time')
-        ?.getAttribute('datetime') || ''
-    )
-  }
-  private _getContent(tweet: Element) {
-    return tweet.querySelector('[data-testid="tweetText"]')?.textContent || ''
-  }
-  private _getImages(tweet: Element) {
-    const allTweetImageEls = tweet.querySelectorAll(
-      '[data-testid="tweetPhoto"]'
-    )
-    return mapElementFn.call<
-      NodeListOf<Element>,
-      [(element: Element) => string],
-      string[]
-    >(
-      allTweetImageEls,
-      (imgEl) => imgEl.querySelector('img')?.getAttribute('src') || ''
-    )
   }
 }
