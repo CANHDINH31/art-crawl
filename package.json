@@ -30,6 +30,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/schedule": "^4.0.1",
     "@types/node": "18.11.18",
     "bull": "^4.12.2",
     "class-transformer": "^0.5.1",

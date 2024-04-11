@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bull'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { Queue } from 'bull'
 import { AxiosService } from 'src/models/axios/axios.service'
 import { PageService } from 'src/models/browser/page.service'
@@ -29,23 +30,20 @@ export class ScraperService {
     @InjectQueue('reply') private replyQueue: Queue
   ) {}
 
+  @Cron(CronExpression.EVERY_3_HOURS)
   async listTweet() {
     try {
       await this.tweetQueue.empty()
-
       const res = await this.axiosService.axiosRef.get(
         this.configService.get('DOMAIN_API') + '/targets?status=1'
       )
-
       const resultTaget = res.data?.map((e) => ({
         id: e._id,
         keywords: e?.keywords,
         hashtags: e?.hashtags,
         urls: e?.urls
       }))
-
       const listTarget = this._gennerateTarget(resultTaget)
-
       for (const target of listTarget) {
         const data = await this.tweetScrape(target as TwitterTargetDto)
         data?.length > 0 &&
@@ -55,13 +53,13 @@ export class ScraperService {
             data
           })
       }
-
       return 'crawl tweet finnish'
     } catch (error) {
       throw error
     }
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async listReply() {
     try {
       let i = 1
@@ -222,6 +220,7 @@ export class ScraperService {
     }
   }
 
+  @Cron(CronExpression.EVERY_DAY_AT_1AM)
   async twitterProfileScrape(username: string) {
     const profileURL = 'https://twitter.com/' + username
     const [page] = await this.pageService.initBrowserPage(1)
