@@ -63,25 +63,28 @@ export class ScraperService {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
+  @Cron(CronExpression.EVERY_4_HOURS)
   async listReply() {
     try {
       let i = 1
 
       while (true) {
         const res = await this.axiosService.axiosRef.get(
-          this.configService.get('DOMAIN_API') + `/replies?page=${i}&status=0`
+          this.configService.get('DOMAIN_API') + `/replies?page=${i}`
         )
 
         if (res?.data?.data?.length === 0) {
           break
         }
+
         const listReplies = res?.data?.data
+
         const listResult: any = []
         for (const reply of listReplies) {
           const url = `https://twitter.com/${reply?.tweet?.target?.profile?.username}/status/${reply.tweetId}`
           const data = await this._getRecrawlTopCommentHandle(url, 3)
-          listResult.push({ tweetId: reply.tweetId, ...data[0] })
+          data?.length > 0 &&
+            listResult.push({ tweetId: reply.tweetId, ...data[0] })
         }
 
         i++
