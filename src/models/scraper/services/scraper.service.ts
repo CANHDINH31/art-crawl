@@ -239,11 +239,6 @@ export class ScraperService {
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  test() {
-    console.log('test')
-  }
-
   private _generateURLS({ hashtags, keywords, url, type }: TwitterTargetDto) {
     switch (type) {
       case TwitterTargetType.URL:
