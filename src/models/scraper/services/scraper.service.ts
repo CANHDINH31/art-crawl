@@ -44,8 +44,12 @@ export class ScraperService {
         urls: e?.urls
       }))
       const listTarget = this._gennerateTarget(resultTaget)
+
       for (const target of listTarget) {
         const data = await this.tweetScrape(target as TwitterTargetDto)
+
+        // if (data?.length === 0) break
+
         data?.length > 0 &&
           this.tweetQueue.add({
             target: target.id,
@@ -262,6 +266,7 @@ export class ScraperService {
     }[]
   ) {
     const newList = listTarget.flatMap((target) => {
+      const result: any = []
       const urlItem = {
         id: target.id,
         type: TwitterTargetType.URL,
@@ -280,7 +285,15 @@ export class ScraperService {
         hashtags: target?.hashtags
       }
 
-      return [urlItem, keywordItem, hashtagItem]
+      target?.urls && target?.urls?.length > 0 && result.push(urlItem)
+      target?.keywords &&
+        target?.keywords?.length > 0 &&
+        result.push(keywordItem)
+      target?.hashtags &&
+        target?.hashtags?.length > 0 &&
+        result.push(hashtagItem)
+
+      return result
     })
 
     return newList
